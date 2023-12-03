@@ -1,0 +1,43 @@
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+
+public class ApiCaller
+{
+    private const string ApiBaseUrl = "https://api.example.com";
+    private readonly string _bearerToken;
+
+    public ApiCaller(string bearerToken)
+    {
+        _bearerToken = bearerToken;
+    }
+
+    public async Task<string> GetApiDataAsync(string endpoint)
+    {
+        // Create an HttpClient instance
+        using (var client = new HttpClient())
+        {
+            // Set the base address and the Authorization header with the bearer token
+            client.BaseAddress = new Uri(ApiBaseUrl);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bearerToken);
+
+            try
+            {
+                // Send a GET request to the specified endpoint
+                var response = await client.GetAsync(endpoint);
+
+                // Ensure the request was successful
+                response.EnsureSuccessStatusCode();
+
+                // Read the response content as a string
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                // Handle any exceptions that occur during the HTTP request
+                return $"Error: {e.Message}";
+            }
+        }
+    }
+}
